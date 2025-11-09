@@ -9,6 +9,22 @@ import (
 var x = 2
 
 func main() {
+	http.HandleFunc("/data", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(200)
+		const tpl = `
+      <p>Hey check out the data</p>
+    `
+		t, err := template.New("default").Parse(tpl)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = t.Execute(w, nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	})
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(200)
 		// fmt.Fprintf(w, "Welcome to the home page!")
@@ -19,9 +35,14 @@ func main() {
 		<meta charset="UTF-8">
 		<title>{{.Title}}</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
 	</head>
 	<body>
 		{{range .Items}}<div class="bg-red-200">{{ . }}</div>{{else}}<div><strong>no rows</strong></div>{{end}}
+
+    <button hx-post="/data" hx-swap="outerHTML" class="bg-pink-500">
+      Click Me
+    </button>
 	</body>
 </html>`
 
